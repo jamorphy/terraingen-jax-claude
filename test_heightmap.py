@@ -144,3 +144,34 @@ def test_output_different_seeds(rng):
     heightmap1 = simple_heightmap_generator(rng, output_size=(256, 256), latent_dim=32)
     heightmap2 = simple_heightmap_generator(rng2, output_size=(256, 256), latent_dim=32)
     assert not jnp.allclose(heightmap1, heightmap2), "Heightmaps with different seeds are identical"
+
+# Step 3: Third batch of 4 tests (File Saving and Visualization)
+def test_save_heightmap_file_exists(tmp_dir):
+    """Test that save_heightmap creates a file."""
+    os.chdir(tmp_dir)
+    heightmap = np.random.random((128, 128))
+    save_heightmap(heightmap, "test_save.png")
+    assert os.path.exists("test_save.png"), "Expected test_save.png to be created"
+
+def test_save_heightmap_invalid_path(tmp_dir):
+    """Test that save_heightmap handles invalid paths gracefully."""
+    os.chdir(tmp_dir)
+    heightmap = np.random.random((128, 128))
+    invalid_path = tmp_dir / "nonexistent_dir" / "test_save.png"
+    with pytest.raises(OSError):
+        save_heightmap(heightmap, invalid_path)
+
+def test_save_multiple_heightmaps_small_number(tmp_dir):
+    """Test save_multiple_heightmaps with a small number of heightmaps."""
+    os.chdir(tmp_dir)
+    heightmaps = [np.random.random((128, 128)) for _ in range(3)]
+    save_multiple_heightmaps(heightmaps, "small_number.png")
+    assert os.path.exists("small_number.png"), "Expected small_number.png to be created"
+
+def test_save_multiple_heightmaps_with_seeds(tmp_dir):
+    """Test save_multiple_heightmaps with specified seeds."""
+    os.chdir(tmp_dir)
+    heightmaps = [np.random.random((128, 128)) for _ in range(3)]
+    seeds = [1, 2, 3]
+    save_multiple_heightmaps(heightmaps, "with_seeds.png", seeds)
+    assert os.path.exists("with_seeds.png"), "Expected with_seeds.png to be created"
