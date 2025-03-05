@@ -120,3 +120,27 @@ def test_output_size_large(rng):
     heightmap = simple_heightmap_generator(rng, output_size=output_size, latent_dim=32)
     assert heightmap.shape == output_size
     assert jnp.all(heightmap >= 0) and jnp.all(heightmap <= 1)
+
+# Step 2: Second batch of 4 tests (Output Properties and Consistency)
+def test_output_non_nan(rng):
+    """Test that the heightmap contains no NaN values."""
+    heightmap = simple_heightmap_generator(rng, output_size=(256, 256), latent_dim=32)
+    assert not jnp.any(jnp.isnan(heightmap)), "Heightmap contains NaN values"
+
+def test_output_non_inf(rng):
+    """Test that the heightmap contains no infinite values."""
+    heightmap = simple_heightmap_generator(rng, output_size=(256, 256), latent_dim=32)
+    assert not jnp.any(jnp.isinf(heightmap)), "Heightmap contains infinite values"
+
+def test_output_variance(rng):
+    """Test that the heightmap has non-zero variance (not a flat plane)."""
+    heightmap = simple_heightmap_generator(rng, output_size=(256, 256), latent_dim=32)
+    variance = jnp.var(heightmap)
+    assert variance > 0, f"Heightmap variance is zero or negative: {variance}"
+
+def test_output_different_seeds(rng):
+    """Test that different seeds produce different heightmaps."""
+    rng2 = random.PRNGKey(43)  # Different seed
+    heightmap1 = simple_heightmap_generator(rng, output_size=(256, 256), latent_dim=32)
+    heightmap2 = simple_heightmap_generator(rng2, output_size=(256, 256), latent_dim=32)
+    assert not jnp.allclose(heightmap1, heightmap2), "Heightmaps with different seeds are identical"
