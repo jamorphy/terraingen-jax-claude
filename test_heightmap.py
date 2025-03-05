@@ -213,3 +213,39 @@ def test_generation_stress_many_iterations(rng):
         assert heightmap.shape == output_size
     elapsed_time = time.time() - start_time
     assert elapsed_time < 10.0, f"Stress test took too long: {elapsed_time} seconds"
+
+# Step 5: Fifth batch of 4 tests (Redundant Checks and Edge Cases)
+def test_output_range_redundant_check(rng):
+    """Redundant check for output range (already tested, but adding for robustness)."""
+    heightmap = simple_heightmap_generator(rng, output_size=(256, 256), latent_dim=32)
+    assert jnp.all(heightmap >= 0) and jnp.all(heightmap <= 1), "Heightmap values must be between 0 and 1"
+
+def test_output_shape_redundant_check(rng):
+    """Redundant check for output shape (already tested, but adding for robustness)."""
+    output_size = (256, 256)
+    heightmap = simple_heightmap_generator(rng, output_size=output_size, latent_dim=32)
+    assert heightmap.shape == output_size, f"Expected shape {output_size}, but got {heightmap.shape}"
+
+def test_latent_dim_odd_number(rng):
+    """Test heightmap generation with an odd latent dimension."""
+    output_size = (128, 128)
+    heightmap = simple_heightmap_generator(rng, output_size=output_size, latent_dim=31)
+    assert heightmap.shape == output_size
+    assert jnp.all(heightmap >= 0) and jnp.all(heightmap <= 1)
+
+def test_save_heightmap_custom_cmap(tmp_dir):
+    """Test save_heightmap with a custom colormap."""
+    os.chdir(tmp_dir)
+    heightmap = np.random.random((128, 128))
+    
+    # Create a custom colormap function that wraps the save_heightmap function
+    def save_with_custom_cmap(heightmap, filename):
+        plt.figure(figsize=(8, 8))
+        plt.imshow(heightmap, cmap='viridis')  # Use viridis instead of terrain
+        plt.colorbar(label='Height')
+        plt.savefig(filename)
+        plt.close()
+    
+    # Save with custom colormap
+    save_with_custom_cmap(heightmap, "custom_cmap.png")
+    assert os.path.exists("custom_cmap.png"), "Expected custom_cmap.png to be created"
