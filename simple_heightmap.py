@@ -24,12 +24,18 @@ def simple_heightmap_generator(rng, output_size=(256, 256), latent_dim=32):
         
     Returns:
         Generated heightmap as a JAX array
+        
+    Raises:
+        ValueError: If output_size dimensions are not positive
     """
+    height, width = output_size
+    if height <= 0 or width <= 0:
+        raise ValueError("Output size dimensions must be positive")
+        
     # Generate a random latent vector
     z = random.normal(rng, (latent_dim,))
     
     # Create a grid of coordinates
-    height, width = output_size
     x = jnp.linspace(-2.0, 2.0, width)
     y = jnp.linspace(-2.0, 2.0, height)
     X, Y = jnp.meshgrid(x, y)
@@ -64,7 +70,13 @@ def save_multiple_heightmaps(heightmaps, filename, seeds=None):
         heightmaps: List of heightmap arrays
         filename: Output filename
         seeds: List of seeds used to generate the heightmaps
+        
+    Raises:
+        ValueError: If heightmaps list is empty
     """
+    if not heightmaps:
+        raise ValueError("Heightmaps list cannot be empty")
+        
     num_maps = len(heightmaps)
     rows = int(np.ceil(np.sqrt(num_maps)))
     cols = int(np.ceil(num_maps / rows))
