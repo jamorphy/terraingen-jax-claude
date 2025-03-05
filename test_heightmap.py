@@ -97,3 +97,26 @@ def test_generation_performance(rng):
     elapsed_time = time.time() - start_time
     assert heightmap.shape == output_size
     assert elapsed_time < 10.0, f"Generation took too long: {elapsed_time} seconds"
+
+# Step 1: First batch of 4 new tests (Input Validation and Edge Cases)
+def test_latent_dim_zero(rng):
+    """Test that a latent dimension of 0 raises an appropriate error."""
+    with pytest.raises(IndexError, match="index is out of bounds"):
+        simple_heightmap_generator(rng, output_size=(128, 128), latent_dim=0)
+
+def test_latent_dim_negative(rng):
+    """Test that a negative latent dimension raises an appropriate error."""
+    with pytest.raises(Exception):  # JAX raises MLIRError for negative dimensions
+        simple_heightmap_generator(rng, output_size=(128, 128), latent_dim=-1)
+
+def test_output_size_single_dimension(rng):
+    """Test that a single dimension output size raises an appropriate error."""
+    with pytest.raises(ValueError, match="not enough values to unpack"):
+        simple_heightmap_generator(rng, output_size=(256,), latent_dim=32)
+
+def test_output_size_large(rng):
+    """Test that a very large output size does not cause crashes (but may take time)."""
+    output_size = (2048, 2048)
+    heightmap = simple_heightmap_generator(rng, output_size=output_size, latent_dim=32)
+    assert heightmap.shape == output_size
+    assert jnp.all(heightmap >= 0) and jnp.all(heightmap <= 1)
