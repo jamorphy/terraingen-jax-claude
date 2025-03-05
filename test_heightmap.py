@@ -175,3 +175,41 @@ def test_save_multiple_heightmaps_with_seeds(tmp_dir):
     seeds = [1, 2, 3]
     save_multiple_heightmaps(heightmaps, "with_seeds.png", seeds)
     assert os.path.exists("with_seeds.png"), "Expected with_seeds.png to be created"
+
+# Step 4: Fourth batch of 4 tests (Performance and Stress Tests)
+def test_generation_small_size_performance(rng):
+    """Test performance for a small size heightmap."""
+    output_size = (64, 64)
+    start_time = time.time()
+    heightmap = simple_heightmap_generator(rng, output_size=output_size, latent_dim=32)
+    elapsed_time = time.time() - start_time
+    assert heightmap.shape == output_size
+    assert elapsed_time < 1.0, f"Small size generation took too long: {elapsed_time} seconds"
+
+def test_generation_medium_size_performance(rng):
+    """Test performance for a medium size heightmap."""
+    output_size = (512, 512)
+    start_time = time.time()
+    heightmap = simple_heightmap_generator(rng, output_size=output_size, latent_dim=32)
+    elapsed_time = time.time() - start_time
+    assert heightmap.shape == output_size
+    assert elapsed_time < 5.0, f"Medium size generation took too long: {elapsed_time} seconds"
+
+def test_generation_high_latent_dim_performance(rng):
+    """Test performance with a high latent dimension."""
+    output_size = (256, 256)
+    start_time = time.time()
+    heightmap = simple_heightmap_generator(rng, output_size=output_size, latent_dim=128)
+    elapsed_time = time.time() - start_time
+    assert heightmap.shape == output_size
+    assert elapsed_time < 5.0, f"High latent dim generation took too long: {elapsed_time} seconds"
+
+def test_generation_stress_many_iterations(rng):
+    """Stress test by generating many small heightmaps."""
+    output_size = (64, 64)
+    start_time = time.time()
+    for _ in range(100):
+        heightmap = simple_heightmap_generator(rng, output_size=output_size, latent_dim=32)
+        assert heightmap.shape == output_size
+    elapsed_time = time.time() - start_time
+    assert elapsed_time < 10.0, f"Stress test took too long: {elapsed_time} seconds"
